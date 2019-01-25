@@ -1,7 +1,8 @@
 import os
 import json
 from flask import Flask, jsonify, request
-from flask_restful import Resource
+from flask_restful import Resource, reqparse
+from flask_restful import reqparse
 from flask_jwt_simple import jwt_required, create_jwt
 import grpc
 from google.protobuf.json_format import MessageToJson
@@ -11,6 +12,8 @@ from protos import accounts_pb2_grpc
 
 HOST = os.environ.get('ACCOUNT_SERVICE_HOST', '0.0.0.0')
 PORT = str(os.environ.get('ACCOUNT_SERVICE_PORT', '22222'))
+
+parser = reqparse.RequestParser()
 
 
 class AuthenticationResource(Resource):
@@ -49,7 +52,7 @@ class AuthenticationResource(Resource):
         return jsonify(ret)
 
 
-class AccountResource(Resource):
+class AccountList(Resource):
 
     @jwt_required
     def get(self):
@@ -62,3 +65,86 @@ class AccountResource(Resource):
                 print(e)
                 return False
             return jsonify(json.loads(MessageToJson(accounts)))
+
+    def post(self):
+        """Signup API endpoint"""
+        params = request.get_json()
+        email = params.get('email', None)
+        name = params.get('name', None)
+        password = params.get('password', None)
+
+        with grpc.insecure_channel(HOST + ':' + PORT) as channel:
+            stub = accounts_pb2_grpc.AccountServiceStub(channel)
+            try:
+                account = accounts_pb2.Account(
+                    name="Leslie Knope",
+                    email='lknope@example.com'
+                )
+
+                createAccountRequest = accounts_pb2.CreateAccountRequest(
+                    account=account,
+                    password='password'
+                )
+                account = stub.Create(createAccountRequest)
+            except Exception as e:
+                print(e)
+                raise
+            return jsonify(json.loads(MessageToJson(account)))
+
+
+class AccountDetail(Resource):
+
+    def get(self, id):
+        """Get the details of a single account."""
+        with grpc.insecure_channel(HOST + ':' + PORT) as channel:
+            stub = accounts_pb2_grpc.AccountServiceStub(channel)
+            try:
+                account = stub.GetByID(
+                    accounts_pb2.GetByIDAccountsRequest(
+                        id=id
+                    )
+                )
+            except Exception as e:
+                print("Invalid username or password? Or perphaps we couldn't connect?")
+                print(e)
+                return False
+            return jsonify(json.loads(MessageToJson(account)))
+
+    def put(self, id):
+        """Update a specific account."""
+        params = request.get_json(force=True)
+        email = params.get('email', None)
+        name = params.get('name', None)
+        password = params.get('password', None)
+
+        with grpc.insecure_channel(HOST + ':' + PORT) as channel:
+            stub = accounts_pb2_grpc.AccountServiceStub(channel)
+            try:
+                account = accounts_pb2.Account(
+                    name=name,
+                    email=email
+                )
+
+                updateAccountRequest = accounts_pb2.UpdateAccountRequest(
+                    id=id,
+                    account=account,
+                    password=password
+                )
+                account = stub.Update(updateAccountRequest)
+            except Exception as e:
+                print(e)
+                raise
+            return jsonify(json.loads(MessageToJson(account)))
+
+    def delete(self, id):
+        with grpc.insecure_channel(HOST + ':' + PORT) as channel:
+            stub = accounts_pb2_grpc.AccountServiceStub(channel)
+            try:
+                deleteAccountRequest = accounts_pb2.DeleteAccountRequest(
+                    id=id
+                )
+                account = stub.Delete(deleteAccountRequest)
+            except Exception as e:
+                print(e)
+                raise
+            return ''

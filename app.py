@@ -19,7 +19,11 @@ from protos import accounts_pb2_grpc
 
 # Import our services:
 from services.accounts import AuthenticationResource
-from services.accounts import AccountResource
+from services.accounts import AccountList
+from services.accounts import AccountDetail
+
+from services.contacts import ContactList
+from services.contacts import ContactDetail
 
 app = Flask(__name__)
 
@@ -36,7 +40,11 @@ class PrivateResource(Resource):
 
 
 api.add_resource(AuthenticationResource, '/authorize')
-api.add_resource(AccountResource, '/accounts')
+
+api.add_resource(AccountList, '/accounts')
+api.add_resource(AccountDetail, '/accounts/<string:id>')
+api.add_resource(ContactList, '/contacts')
+api.add_resource(ContactDetail, '/contacts/<string:id>')
 api.add_resource(PrivateResource, '/private')
 
 print(__name__)
