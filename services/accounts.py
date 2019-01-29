@@ -6,17 +6,18 @@ from flask_restful import reqparse
 from flask_jwt_simple import jwt_required, create_jwt
 import grpc
 from google.protobuf.json_format import MessageToJson
+from flask_restful_swagger import swagger
 
 from protos import accounts_pb2
 from protos import accounts_pb2_grpc
 
-HOST = os.environ.get('ACCOUNT_SERVICE_HOST', '0.0.0.0')
-PORT = str(os.environ.get('ACCOUNT_SERVICE_PORT', '22222'))
+HOST = os.environ.get('ACCOUNTS_SERVICE_HOST', '0.0.0.0')
+PORT = str(os.environ.get('ACCOUNTS_SERVICE_PORT', '22222'))
 
 parser = reqparse.RequestParser()
 
 
-class AuthenticationResource(Resource):
+class AuthorizeResource(Resource):
 
     def post(self):
         # Provide a method to create access tokens. The create_jwt()

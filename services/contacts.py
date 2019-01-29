@@ -24,7 +24,7 @@ class ContactList(Resource):
         with grpc.insecure_channel(HOST + ':' + PORT) as channel:
             stub = contacts_pb2_grpc.ContactServiceStub(channel)
             try:
-                contacts = stub.List(accounts_pb2.ListContactsRequest(page_size=1, page_token="1"))
+                contacts = stub.List(contacts_pb2.ListContactsRequest(page_size=1, page_token="1"))
             except Exception as e:
                 print("Invalid username or password? Or perphaps we couldn't connect?")
                 print(e)
@@ -126,7 +126,7 @@ class ContactDetail(Resource):
                 deleteContactRequest = contacts_pb2.DeleteContactRequest(
                     id=id
                 )
-                account = stub.Delete(deleteContactRequest)
+                contact = stub.Delete(deleteContactRequest)
             except Exception as e:
                 print(e)
                 raise

@@ -17,8 +17,10 @@ import grpc
 from protos import accounts_pb2
 from protos import accounts_pb2_grpc
 
+from flasgger import Swagger
+
 # Import our services:
-from services.accounts import AuthenticationResource
+from services.accounts import AuthorizeResource
 from services.accounts import AccountList
 from services.accounts import AccountDetail
 
@@ -32,6 +34,7 @@ jwt = JWTManager(app)
 
 api = Api(app, prefix="/api")
 
+swagger = Swagger(app)
 
 class PrivateResource(Resource):
     @jwt_required
@@ -39,7 +42,7 @@ class PrivateResource(Resource):
         return jsonify({'hello_from': get_jwt_identity()})
 
 
-api.add_resource(AuthenticationResource, '/authorize')
+api.add_resource(AuthorizeResource, '/authorize')
 
 api.add_resource(AccountList, '/accounts')
 api.add_resource(AccountDetail, '/accounts/<string:id>')
