@@ -24,6 +24,7 @@ FROM python:3.7
 
 ADD . /code
 WORKDIR /code
+COPY --from=0 /code/boiler-protorepo/protos ./protos
 RUN pip install -r requirements.txt
 
 EXPOSE 80
