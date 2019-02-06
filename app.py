@@ -1,4 +1,7 @@
-print("RUNNING APP.py")
+# Help the system find the proto library:
+import sys
+sys.path.append('./protos')
+
 import os
 import logging
 import sys
